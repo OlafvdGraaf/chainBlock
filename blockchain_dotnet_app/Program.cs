@@ -13,24 +13,13 @@ namespace blockchain_dotnet_app
                 "Diamant arrived in New York"
             };
 
-            String[] transActions2 =
-            {
-                "nothing"
-            };
+            ChainIterator iter = new ChainIterator(new Block(transActions, "nothing"));
 
-            Block block1 = new Block(transActions, 0);
+            iter.addTransaction("Diamant was won in south America");
+            iter.addTransaction("Diamant arrived at Amsterdam");
+            iter.addTransaction("Diamant was sold");
 
-            Block block2 = new Block(transActions, block1.getHash());
-
-            Block block3 = new Block(transActions, block2.getHash());
-
-            Block block4 = new Block(transActions, block3.getHash());
-
-            Block block5 = new Block(transActions, block4.getHash());
-
-            Block block6 = new Block(transActions, block5.getHash());
-            
-            Console.WriteLine("hello world");
+            Console.ReadLine();
         }
     }
 }

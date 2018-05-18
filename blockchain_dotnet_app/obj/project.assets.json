@@ -670,11 +670,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "c:\\users\\dymos\\Source\\Repos\\blockchain_dotnet_app\\blockchain_dotnet_app\\blockchain_dotnet_app.csproj",
+      "projectUniqueName": "C:\\Users\\Dymos\\Documents\\hogeschoolrotterdamjaar2\\proejct 78\\Chainblock\\chainBlock\\blockchain_dotnet_app\\blockchain_dotnet_app.csproj",
       "projectName": "blockchain_dotnet_app",
-      "projectPath": "c:\\users\\dymos\\Source\\Repos\\blockchain_dotnet_app\\blockchain_dotnet_app\\blockchain_dotnet_app.csproj",
+      "projectPath": "C:\\Users\\Dymos\\Documents\\hogeschoolrotterdamjaar2\\proejct 78\\Chainblock\\chainBlock\\blockchain_dotnet_app\\blockchain_dotnet_app.csproj",
       "packagesPath": "C:\\Users\\Dymos\\.nuget\\packages\\",
-      "outputPath": "c:\\users\\dymos\\Source\\Repos\\blockchain_dotnet_app\\blockchain_dotnet_app\\obj\\",
+      "outputPath": "C:\\Users\\Dymos\\Documents\\hogeschoolrotterdamjaar2\\proejct 78\\Chainblock\\chainBlock\\blockchain_dotnet_app\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

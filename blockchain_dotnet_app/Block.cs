@@ -10,12 +10,12 @@ namespace blockchain_dotnet_app
     class Block
     {
         /*hash of previous transactions which may not be changed*/
-        private int previousHash;
-        private String[] transactions;
-        private int hash;
+        private string previousHash;
+        private string[] transactions;
+        private string hash;
 
 
-        public Block(String[] transactions, int previousHash)
+        public Block(string[] transactions, string previousHash)
         {
             this.transactions = transactions;
             this.previousHash = previousHash;
@@ -23,38 +23,35 @@ namespace blockchain_dotnet_app
             this.updateBlock();
         }
 
-        public int getHash()
+        public int getAmountOfTransactions()
+        {
+            return this.transactions.Count<string>();
+        }
+
+        public string getHash()
         {
             return hash;
         }
 
-        public void addTransaction(String transaction)
+        public void updateBlock()
         {
-            List<String> transList = this.transactions.ToList<String>();
-            transList.Add(transaction);
-            this.transactions = transList.ToArray<String>();
-
-            this.updateBlock();
-        }
-
-        private void updateBlock()
-        {
-            int[] combinedValues = { this.generateHash<String>(this.transactions), this.previousHash };
-            this.hash = this.generateHash<int>(combinedValues);
+            string[] combinedValues = { this.generateHash<string>(this.transactions), this.previousHash };
+            this.hash = this.generateHash<string>(combinedValues);
             Console.WriteLine("A new Hash was generated for the Block: {0}", this.hash);
+            Console.WriteLine(" ");
         }
 
-        private int generateHash<T>(T[] transactions)
+        private string generateHash<T>(T[] transactions)
         {
             SHA256 sha256 = SHA256Managed.Create();
 
-            int result = 9;
+            string result = "";
             foreach (var t in transactions)
             {
                 byte[] bytes = Encoding.UTF8.GetBytes(t.ToString());
                 byte[] hash = sha256.ComputeHash(bytes);
 
-                result = result * BitConverter.ToInt32(hash, 0);
+                result += BitConverter.ToString(hash, 0).Replace("-", "");
             }
             return result;
         }
