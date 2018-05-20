@@ -8,20 +8,20 @@ namespace blockchain_dotnet_app
     class ChainIterator
     {
         List<Block> chain;
-        private List<string> transactions;
+        private List<Transaction> transactions;
 
         public ChainIterator(Block firstBlock)
         {
             this.chain = new List<Block>();
             this.addBlock(firstBlock);
-            this.transactions = new List<string>();
+            this.transactions = new List<Transaction>();
         }
 
-        public void addTransaction(string transaction)
+        public void addTransaction(Transaction transaction)
         {
             if (this.enoughTransactions())
             {
-                this.addBlock(new Block(this.transactions.ToArray<string>(), this.chain.Last<Block>().getHash()));
+                this.addBlock(new Block(this.transactions, this.chain.Last<Block>().getHash()));
                 Console.WriteLine("new block was made");
                 Console.WriteLine(" ");
                 this.transactions.Clear();

@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 2,
   "targets": {
     ".NETCoreApp,Version=v2.0": {
       "Microsoft.NETCore.App/2.0.0": {
@@ -194,7 +194,7 @@
           "lib/netstandard1.0/_._": {}
         },
         "build": {
-          "build/netstandard2.0/NETStandard.Library.targets": {}
+          "build/NETStandard.Library.targets": {}
         }
       }
     }
@@ -664,41 +664,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Dymos\\.nuget\\packages\\": {},
-    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
+    "C:\\Users\\Wouter\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Dymos\\Documents\\hogeschoolrotterdamjaar2\\proejct 78\\Chainblock\\chainBlock\\blockchain_dotnet_app\\blockchain_dotnet_app.csproj",
+      "projectUniqueName": "C:\\Users\\Wouter\\Documents\\GitHub\\chainBlock\\blockchain_dotnet_app\\blockchain_dotnet_app.csproj",
       "projectName": "blockchain_dotnet_app",
-      "projectPath": "C:\\Users\\Dymos\\Documents\\hogeschoolrotterdamjaar2\\proejct 78\\Chainblock\\chainBlock\\blockchain_dotnet_app\\blockchain_dotnet_app.csproj",
-      "packagesPath": "C:\\Users\\Dymos\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Dymos\\Documents\\hogeschoolrotterdamjaar2\\proejct 78\\Chainblock\\chainBlock\\blockchain_dotnet_app\\obj\\",
+      "projectPath": "C:\\Users\\Wouter\\Documents\\GitHub\\chainBlock\\blockchain_dotnet_app\\blockchain_dotnet_app.csproj",
+      "outputPath": "C:\\Users\\Wouter\\Documents\\GitHub\\chainBlock\\blockchain_dotnet_app\\obj\\",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
-      ],
-      "configFilePaths": [
-        "C:\\Users\\Dymos\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
-      ],
       "originalTargetFrameworks": [
         "netcoreapp2.0"
       ],
-      "sources": {
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "https://api.nuget.org/v3/index.json": {}
-      },
       "frameworks": {
         "netcoreapp2.0": {
           "projectReferences": {}
         }
-      },
-      "warningProperties": {
-        "warnAsError": [
-          "NU1605"
-        ]
       }
     },
     "frameworks": {
@@ -706,15 +688,10 @@
         "dependencies": {
           "Microsoft.NETCore.App": {
             "target": "Package",
-            "version": "[2.0.0, )",
+            "version": "2.0",
             "autoReferenced": true
           }
-        },
-        "imports": [
-          "net461"
-        ],
-        "assetTargetFallback": true,
-        "warn": true
+        }
       }
     }
   }
