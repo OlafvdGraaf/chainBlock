@@ -17,16 +17,16 @@ namespace blockchain_dotnet_app
         private string previousHash;
         private List<Transaction> transactions;
         private string hash;
+        private int proof;
 
 
-        public Block(List<Transaction> transactions, string previousHash)
+        public Block(List<Transaction> transactions, string previousHash, int proof)
         {
             Interlocked.Increment(ref counter);
             this.id = counter;
             this.transactions = transactions;
             this.previousHash = previousHash;
-
-            this.updateBlock();
+            this.proof = proof;
         }
 
         public int getAmountOfTransactions()
@@ -34,32 +34,15 @@ namespace blockchain_dotnet_app
             return this.transactions.Count<Transaction>();
         }
 
+        public int getId()
+        {
+            return this.id;
+        }
+
         public string getHash()
         {
             return hash;
         }
 
-        public void updateBlock()
-        {
-            List<string> combinedValues = new List<string>{ this.generateHash<Transaction>(this.transactions), this.previousHash };
-            this.hash = this.generateHash<string>(combinedValues);
-            Console.WriteLine("A new Hash was generated for the Block: {0}", this.hash);
-            Console.WriteLine(" ");
-        }
-
-        private string generateHash<T>(List<T> transactions)
-        {
-            SHA256 sha256 = SHA256Managed.Create();
-
-            string result = "";
-            foreach (var t in transactions)
-            {
-                byte[] bytes = Encoding.UTF8.GetBytes(t.ToString());
-                byte[] hash = sha256.ComputeHash(bytes);
-
-                result += BitConverter.ToString(hash, 0).Replace("-", "");
-            }
-            return result;
-        }
     }
 }
