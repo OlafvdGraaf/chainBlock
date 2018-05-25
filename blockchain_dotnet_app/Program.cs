@@ -7,12 +7,6 @@ namespace blockchain_dotnet_app
     {
         static void Main(string[] args)
         {
-            
-            //String[] transActions = {
-            //    "Diamant was won at Canada",
-            //    "Diamant arrived at Walmart",
-            //    "Diamant arrived in New York"
-            //};
 
            /* List if 3 transactions
             Transaction(List<Product>, chainTokenAmount : double, transactionFee : double) 
