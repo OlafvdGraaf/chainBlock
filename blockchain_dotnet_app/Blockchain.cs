@@ -12,48 +12,49 @@ namespace blockchain_dotnet_app
     class Blockchain
     {
         private List<Block> chain;
-        private List<Transaction> current_transactions;
-        private Block last_block;
+        public List<Transaction> current_transactions;
 
 
         public Blockchain()
         {
             this.chain = new List<Block>();
             this.current_transactions = new List<Transaction>();
-            this.last_block = chain.Last();
-
             //create genisis block
             this.newBlock(100, "none");
-      
         }
 
-        public Block newBlock(int proof, string previous_hash)
+        public List<Block> getChain()
+        {
+            return this.chain;
+        }
+
+        public Block newBlock(int proof, string hash)
         {
             //Create new Block
-            Block block = new Block(this.current_transactions, previous_hash, proof);
-
-            //Reset Current transactions
-            this.current_transactions.Clear();
+            Block block = new Block(this.current_transactions, hash, proof);
 
             //Add Block to the chain
-            this.chain.Append(block);
+            this.chain.Add(block);
+
+            //Reset Current transactions
+            this.current_transactions = new List<Transaction>();
 
             return block;
         }
 
-        public int newTransaction(string sender, string recipient, List<Product> products, double amount, double fee)
+        public int newTransaction(Transaction transaction)
         {
-            this.current_transactions.Append(new Transaction(products, sender, recipient, amount, fee));
+            this.current_transactions.Add(transaction);
 
-            return this.last_block.getId() + 1;
+            return this.chain.Last().id + 1;
         }
 
         public Block getLastBlock()
         {
-            return this.last_block;
+            return this.chain.Last();
         }
 
-        public static string hash(Block block)
+        public string hash(Block block)
         {
             SHA256 sha256 = SHA256Managed.Create();
 
@@ -61,7 +62,7 @@ namespace blockchain_dotnet_app
 
             byte[] hash = sha256.ComputeHash(bytes);
 
-            string result = BitConverter.ToString(hash,0);
+            string result = BitConverter.ToString(hash,0).Replace("-","");
 
             return result;
         }
@@ -71,28 +72,28 @@ namespace blockchain_dotnet_app
             //create new sha256 object
             SHA256 sha256 = SHA256Managed.Create();
 
-            //xor the last proof against a new proof
-            int guess = last_proof ^ proof;
+            //create a string from the last proof against plus new new inserted proof
+            string guess = last_proof.ToString() +  proof.ToString();
 
-            // encode the xor to bytes
-            byte[] bytes = Encoding.UTF8.GetBytes(guess.ToString());
+            // encode the UTF-8 string to a bytes array
+            byte[] bytes = Encoding.UTF8.GetBytes(guess);
 
             // get a hash from the encoded bytes
             byte[] hash = sha256.ComputeHash(bytes);
 
             // convert the hash to a hexadecimal string
-            string result = BitConverter.ToString(hash, 0);
+            string result = BitConverter.ToString(hash, 0).Replace("-","");
 
             //check if the first 4 characters of the hexadecimal hash are 0000
             return result.Substring(0, 4) == "0000";
-
         }
 
         public int proofOfWork(int last_proof)
         {
             int proof = 0;
             
-            while(!validProof(last_proof, proof){
+            while(!validProof(last_proof, proof))
+            {
                 proof++;
             }
 

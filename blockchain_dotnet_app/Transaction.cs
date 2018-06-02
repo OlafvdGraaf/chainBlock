@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 
 namespace blockchain_dotnet_app
 {
-    class Transaction
+    public class Transaction
     {
-        private string sender;
-        private string recipient;
+        public int id;
         static int counter;
-        private int id;
-        private List<Product> products;
-        private double chainTokens;
-        private double transactionFee;
+        public string sender;
+        public string recipient;
+        public List<Product> products;
+        public double chainTokens;
+        public double transactionFee;
 
         public Transaction(List<Product> products, string sender, string recipient, double chainTokens, double transactionFee)
         {

@@ -5,12 +5,12 @@ using System.Threading;
 
 namespace blockchain_dotnet_app
 {
-    class Product
+    public class Product
     {
         static int counter;
-        private int id;
+        public int id;
         //private node origin
-        private int weight;
+        public int weight;
 
         public Product(int weight)
         {
