@@ -28,11 +28,11 @@ namespace blockchain_dotnet_app
             //create response message with new block details
             var response = new Dictionary<string, dynamic>()
             {
-                {"message", "New Block Forged" },
-                {"index" , block.id },
-                {"transactions", block.transactions },
-                {"proof", block.proof },
-                {"hash", block.hash },
+                { "message", "New Block Forged" },
+                { "index" , block.id },
+                { "transactions", block.transactions },
+                { "proof", block.proof },
+                { "hash", block.hash },
             };
 
             return Json(response);
@@ -74,6 +74,57 @@ namespace blockchain_dotnet_app
             var response = new Dictionary<string, dynamic>();
             response.Add("chain", Program.blockchain.getChain());
             response.Add("length", Program.blockchain.getChain().Count);
+            return Json(response);
+        }
+
+        [HttpPost("nodes/register")]
+        public IActionResult registerNodes([FromBody]JObject value)
+        {
+            var nodes = value["nodes"];
+
+            if(nodes == null)
+            {
+                return BadRequest("Error: please supply a valid list of nodes");
+            }
+
+            foreach(var node in nodes)
+            {
+                Program.blockchain.registerNode(node.ToString());
+            }
+
+            Dictionary<string, dynamic> response = new Dictionary<string, dynamic>()
+            {
+                { "message", "new nodes have been added" },
+                { "total_nodes" , Program.blockchain.getNodes() },
+            };
+
+            return Ok(response);
+            
+        }
+
+        [HttpGet("nodes/resolve")]
+        public JsonResult consensus()
+        {
+            var replaced = Program.blockchain.resolveConflicts();
+            Dictionary<string, dynamic> response;
+
+            if (replaced)
+            {
+                response = new Dictionary<string, dynamic>()
+                {
+                    { "message", "Your chain was replaced by a newer chain" },
+                    { "new_chain", Program.blockchain.getChain() }
+                };
+            }
+            else
+            {
+                response = new Dictionary<string, dynamic>()
+                {
+                    { "message", "Your chain is authoritative" },
+                    { "chain", Program.blockchain.getChain() }
+                };
+            }
+
             return Json(response);
         }
     }
