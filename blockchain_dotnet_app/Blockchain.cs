@@ -28,7 +28,7 @@ namespace blockchain_dotnet_app
             this.nodes = new List<string>();
             this.products = new List<Product>();
 
-            //create genisis block
+            // create genisis block
             this.newBlock(100, "none");
         }
 
@@ -68,7 +68,7 @@ namespace blockchain_dotnet_app
 
         public List<int> getProductIds()
         {
-            //init a list of id's
+            // init a list of id's
             List<int> product_ids = new List<int>();
 
             foreach(var product in this.products)
@@ -81,7 +81,7 @@ namespace blockchain_dotnet_app
 
         public List<Transaction> getProductTransactions(int id)
         {
-            //init a new list of transactions
+            // init a new list of transactions
             List<Transaction> product_transactions = new List<Transaction>();
 
             foreach(var block in this.chain)
@@ -98,7 +98,7 @@ namespace blockchain_dotnet_app
                 }
             }
 
-            //return the transaction where the product was in
+            // return the transaction where the product was in
             return product_transactions;
         }
 
@@ -115,13 +115,13 @@ namespace blockchain_dotnet_app
 
         public Block newBlock(int proof, string hash)
         {
-            //Create new Block
+            // create new Block
             Block block = new Block(this.current_transactions, hash, proof);
 
-            //Add Block to the chain
+            // add Block to the chain
             this.chain.Add(block);
 
-            //Reset Current transactions
+            // reset Current transactions
             this.current_transactions = new List<Transaction>();
 
             return block;
@@ -129,17 +129,63 @@ namespace blockchain_dotnet_app
 
         public int newTransaction(Transaction transaction)
         {
-            //Add transaction to transactionlist
+            // add transaction to transactionlist
             this.current_transactions.Add(transaction);
 
-            //Add every product to the list of products
+            // add every product to the list of products
             foreach (Product product in transaction.products)
             {
                 this.products.Add(product);
             }
 
+            // distribute the transaction over the network
+            this.distributeTransaction(transaction);
+
             return this.chain.Last().id + 1;
         }
+
+        //TODO: Make async, transaction part not working yet
+        public void distributeTransaction(Transaction data)
+        {
+            List<string> neighbors = this.nodes;
+
+            byte[] dataBytes = Encoding.UTF8.GetBytes(Newtonsoft.Json.JsonConvert.SerializeObject(data));
+            Console.WriteLine("inside function, bytes are encoded");
+            foreach (string node in neighbors)
+            {
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://" + node + "/Blockchain/transaction/test");
+                request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+                request.ContentLength = dataBytes.Length;
+                request.ContentType = "application/json; charset=utf-8";
+                request.Method = "POST";
+                Console.WriteLine("request made with post");
+                using (Stream requestBody = request.GetRequestStream())
+                {
+                    requestBody.Write(dataBytes, 0, dataBytes.Length);
+                    Console.WriteLine("writing request body");
+                }
+                Console.WriteLine("made it");
+                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                using (Stream stream = response.GetResponseStream())
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    if ((int)response.StatusCode == 200)
+                    {
+                        Console.WriteLine("Transaction distributed to node: " + node);
+                        Console.WriteLine("Reponse: " + reader.ReadToEnd());
+                        Console.WriteLine("--------------");
+                    }
+                    else
+                    {
+                        Console.WriteLine("error connecting to node");
+                    }
+                    
+                }
+
+            }
+
+        }
+
 
         /*  HASHING AND MINING*/
 
@@ -158,10 +204,10 @@ namespace blockchain_dotnet_app
 
         public static bool validProof(int last_proof, int proof, string prev_hash)
         {
-            //create new sha256 object
+            // create new sha256 object
             SHA256 sha256 = SHA256Managed.Create();
 
-            //create a string from the last proof against plus new new inserted proof
+            // create a string from the last proof against plus new new inserted proof
             string guess = last_proof.ToString() +  proof.ToString() + prev_hash;
 
             // encode the UTF-8 string to a bytes array
@@ -173,7 +219,7 @@ namespace blockchain_dotnet_app
             // convert the hash to a hexadecimal string
             string result = BitConverter.ToString(hash, 0).Replace("-","");
 
-            //check if the first 4 characters of the hexadecimal hash are 0000
+            // check if the first 4 characters of the hexadecimal hash are 0000
             return result.Substring(0, 4) == "0000";
         }
 

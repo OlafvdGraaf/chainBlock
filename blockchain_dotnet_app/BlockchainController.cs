@@ -37,6 +37,11 @@ namespace blockchain_dotnet_app
 
             return Json(response);
         }
+        [HttpPost("transaction/test")]
+        public IActionResult test([FromBody]JObject value)
+        {
+            return Ok(value);
+        }
 
         [HttpPost("transaction/new")]
         public IActionResult newTransaction([FromBody]JObject value)
