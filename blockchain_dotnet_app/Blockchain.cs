@@ -16,18 +16,23 @@ namespace blockchain_dotnet_app
     {
         private List<Block> chain;
         private List<string> nodes;
+        private List<Product> products;
         public List<Transaction> current_transactions;
         
+        /* CONSTRUCTOR */
 
         public Blockchain()
         {
             this.chain = new List<Block>();
             this.current_transactions = new List<Transaction>();
             this.nodes = new List<string>();
+            this.products = new List<Product>();
 
             //create genisis block
             this.newBlock(100, "none");
         }
+
+        /* GETTERS */
 
         public List<Block> getChain()
         {
@@ -38,6 +43,66 @@ namespace blockchain_dotnet_app
         {
             return this.nodes;
         }
+
+        public Block getLastBlock()
+        {
+            return this.chain.Last();
+        }
+
+        public List<Product> getProducts()
+        {
+            return this.products;
+        }
+
+        public Product GetProduct(int id)
+        {
+            foreach(Product product in this.products)
+            {
+                if(product.id == id)
+                {
+                    return product;
+                }
+            }
+            return null;
+        }
+
+        public List<int> getProductIds()
+        {
+            //init a list of id's
+            List<int> product_ids = new List<int>();
+
+            foreach(var product in this.products)
+            {
+                product_ids.Add(product.id);
+            }
+
+            return product_ids;
+        }
+
+        public List<Transaction> getProductTransactions(int id)
+        {
+            //init a new list of transactions
+            List<Transaction> product_transactions = new List<Transaction>();
+
+            foreach(var block in this.chain)
+            {
+                foreach(var transaction in block.transactions)
+                {
+                    foreach(var product in transaction.products)
+                    {
+                        if(product.id == id)
+                        {
+                            product_transactions.Add(transaction);
+                        }
+                    }
+                }
+            }
+
+            //return the transaction where the product was in
+            return product_transactions;
+        }
+
+        /* CREATION OF ENTITIES */
 
         public void registerNode(string address)
         {
@@ -64,15 +129,19 @@ namespace blockchain_dotnet_app
 
         public int newTransaction(Transaction transaction)
         {
+            //Add transaction to transactionlist
             this.current_transactions.Add(transaction);
+
+            //Add every product to the list of products
+            foreach (Product product in transaction.products)
+            {
+                this.products.Add(product);
+            }
 
             return this.chain.Last().id + 1;
         }
 
-        public Block getLastBlock()
-        {
-            return this.chain.Last();
-        }
+        /*  HASHING AND MINING*/
 
         public string hash(Block block)
         {
@@ -87,13 +156,13 @@ namespace blockchain_dotnet_app
             return result;
         }
 
-        public static bool validProof(int last_proof, int proof)
+        public static bool validProof(int last_proof, int proof, string prev_hash)
         {
             //create new sha256 object
             SHA256 sha256 = SHA256Managed.Create();
 
             //create a string from the last proof against plus new new inserted proof
-            string guess = last_proof.ToString() +  proof.ToString();
+            string guess = last_proof.ToString() +  proof.ToString() + prev_hash;
 
             // encode the UTF-8 string to a bytes array
             byte[] bytes = Encoding.UTF8.GetBytes(guess);
@@ -112,7 +181,7 @@ namespace blockchain_dotnet_app
         {
             int proof = 0;
             
-            while(!validProof(last_proof, proof))
+            while(!validProof(last_proof, proof, this.getLastBlock().hash))
             {
                 proof++;
             }
@@ -122,7 +191,7 @@ namespace blockchain_dotnet_app
 
         public bool validChain(List<Block> chain)
         {
-            Block last_block = this.getLastBlock();
+            Block last_block = this.chain[0];
             int current_index = 1;
 
             while(current_index < chain.Count)
@@ -140,7 +209,7 @@ namespace blockchain_dotnet_app
                 }
 
                 //check the proof of work correctness
-                if(!validProof(last_block.proof, block.proof))
+                if(!validProof(last_block.proof, block.proof, last_block.hash))
                 {
                     Console.WriteLine("proof of work does not match");
                     return false;
@@ -159,22 +228,17 @@ namespace blockchain_dotnet_app
             List<Block> new_chain = null;
 
             var max_length = this.chain.Count;
-            Console.WriteLine("yes im in");
             foreach(string node in neighbors)
             {
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://" + node + "/Blockchain/chain");
-                Console.WriteLine("request made");
                 request.Accept = "application/json; charset=utf-8";
                 request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-                Console.WriteLine("compressed data");
                 using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
                 using (Stream stream = response.GetResponseStream())
                 using (StreamReader reader = new StreamReader(stream))
                 {
-                    Console.WriteLine("insade streamreader");
                     if ((int)response.StatusCode == 200)
                     {
-                        Console.WriteLine("statsu code 200");
                         var json_text = reader.ReadToEnd();
                         JObject json = JObject.Parse(json_text);
                         var json_length = json["length"];

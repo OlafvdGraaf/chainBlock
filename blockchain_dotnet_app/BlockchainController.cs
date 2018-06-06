@@ -53,8 +53,37 @@ namespace blockchain_dotnet_app
                 }
             }
 
-            // make new  transaction object
-            Transaction new_transaction = value.ToObject<Transaction>();
+            // init a list for new products
+            List<Product> products = new List<Product>();
+
+            //check if the product is new or an excisting
+            foreach (var product in value["products"])
+            {
+                // check if a new product is made
+                if (product["id"].ToString() == "new")
+                {
+                    // TODO: check if the the node that made a new product is a diamond miner
+
+                    // create new product
+                    products.Add(new Product(product["weight"].ToObject<int>()));
+                }
+                // check if the product excists on the blockchain
+                else if (Program.blockchain.getProductIds().Contains(product["id"].ToObject<int>()))
+                {
+                    // TODO: check if the sender if the product with id thats being send, was the reciever of the product in its latest transaction
+
+                    // add the product to the list
+                    products.Add(Program.blockchain.GetProduct(product["id"].ToObject<int>()));
+                }
+                else
+                {
+                    return BadRequest("A product in your transaction is not present on the blockchain");
+                }
+
+            }
+
+            // make new transaction object
+            Transaction new_transaction = new Transaction(products, value["sender"].ToString(), value["recipient"].ToString(), value["chainTokens"].ToObject<double>(), value["transactionFee"].ToObject<double>());
 
             // add the new transaction to the blockchain transaction list and return the block index of the next block
             var index = Program.blockchain.newTransaction(new_transaction);
@@ -75,6 +104,29 @@ namespace blockchain_dotnet_app
             response.Add("chain", Program.blockchain.getChain());
             response.Add("length", Program.blockchain.getChain().Count);
             return Json(response);
+        }
+
+        [HttpGet("products")]
+        public JsonResult products()
+        {
+            //return the products on the blockchain and the amount of them
+            var response = new Dictionary<string, dynamic>();
+            response.Add("products", Program.blockchain.getProducts());
+            response.Add("amount", Program.blockchain.getProducts().Count);
+            return Json(response);
+        }
+
+        [HttpGet("trace/{id}")]
+        public IActionResult trace(int id)
+        {
+            foreach(var product in Program.blockchain.getProducts())
+            {
+                if(product.id == id)
+                {
+                    return Ok(Program.blockchain.getProductTransactions(id));
+                }
+            }
+            return NotFound("The product Id was not found on the blockchain");
         }
 
         [HttpPost("nodes/register")]

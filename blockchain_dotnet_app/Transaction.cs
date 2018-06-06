@@ -10,9 +10,9 @@ namespace blockchain_dotnet_app
     {
         public int id;
         static int counter;
+        public List<Product> products;
         public string sender;
         public string recipient;
-        public List<Product> products;
         public double chainTokens;
         public double transactionFee;
 
@@ -20,9 +20,9 @@ namespace blockchain_dotnet_app
         {
             Interlocked.Increment(ref counter);
             this.id = counter;
+            this.products = products;
             this.sender = sender;
             this.recipient = recipient;
-            this.products = products;
             this.chainTokens = chainTokens;
             this.transactionFee = transactionFee;
         }
