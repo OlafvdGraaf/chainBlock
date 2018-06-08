@@ -98,7 +98,7 @@ namespace blockchain_dotnet_app
                 }
             }
 
-            // return the transaction where the product was in
+            // return the transactions where the product was in
             return product_transactions;
         }
 
@@ -138,41 +138,46 @@ namespace blockchain_dotnet_app
                 this.products.Add(product);
             }
 
-            // distribute the transaction over the network
-            this.distributeTransaction(transaction);
-
             return this.chain.Last().id + 1;
         }
 
-        //TODO: Make async, transaction part not working yet
-        public void distributeTransaction(Transaction data)
+        public async Task distributeTransaction(JObject transaction, List<string> skipnodes)
         {
-            List<string> neighbors = this.nodes;
+            List<string> neighbors = this.nodes.Except(skipnodes).ToList();
+
+            // add the neighbors to the nodes to skip
+            skipnodes.AddRange(neighbors);
+
+            // create the data to be sent to neighbors
+            Dictionary<string, dynamic> data = new Dictionary<string, dynamic>()
+            {
+                {"transaction", transaction},
+                {"nodes", skipnodes}
+            };
 
             byte[] dataBytes = Encoding.UTF8.GetBytes(Newtonsoft.Json.JsonConvert.SerializeObject(data));
-            Console.WriteLine("inside function, bytes are encoded");
+
             foreach (string node in neighbors)
             {
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://" + node + "/Blockchain/transaction/test");
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://" + node + "/Blockchain/transaction/distribute");
                 request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
                 request.ContentLength = dataBytes.Length;
                 request.ContentType = "application/json; charset=utf-8";
                 request.Method = "POST";
-                Console.WriteLine("request made with post");
+
                 using (Stream requestBody = request.GetRequestStream())
                 {
-                    requestBody.Write(dataBytes, 0, dataBytes.Length);
-                    Console.WriteLine("writing request body");
+                    await requestBody.WriteAsync(dataBytes, 0, dataBytes.Length);
                 }
-                Console.WriteLine("made it");
-                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+
+                using (HttpWebResponse response = (HttpWebResponse) await request.GetResponseAsync())
                 using (Stream stream = response.GetResponseStream())
                 using (StreamReader reader = new StreamReader(stream))
                 {
                     if ((int)response.StatusCode == 200)
                     {
                         Console.WriteLine("Transaction distributed to node: " + node);
-                        Console.WriteLine("Reponse: " + reader.ReadToEnd());
+                        Console.WriteLine("Response: " + await reader.ReadToEndAsync());
                         Console.WriteLine("--------------");
                     }
                     else
@@ -186,14 +191,75 @@ namespace blockchain_dotnet_app
 
         }
 
+        /* VALIDATION */
 
-        /*  HASHING AND MINING*/
+        public JObject validateTransaction(JObject request)
+        {
+            // set the rules of the expected request
+            string[] required = new string[] { "products", "sender", "recipient", "chainTokens", "transactionFee" };
 
-        public string hash(Block block)
+            // initialize response
+            Dictionary<string, dynamic> response = new Dictionary<string, dynamic>();
+
+            // check if the request has the right json keys
+            foreach (string rule in required)
+            {
+                if (!request.ContainsKey(rule))
+                {
+                    response.Add("validation", false);
+                    response.Add("response", "Missing values");
+                    return JObject.Parse(Newtonsoft.Json.JsonConvert.SerializeObject(response));
+                }
+            }
+
+            // init a list for new products
+            List<Product> products = new List<Product>();
+
+            //check if the product is new or an excisting
+            foreach (var product in request["products"])
+            {
+                // check if a new product is made
+                if (product["id"].ToString() == "new")
+                {
+                    // TODO: check if the the node that made a new product is a diamond miner
+
+                    // create new product
+                    products.Add(new Product(product["weight"].ToObject<int>()));
+                }
+                // check if the product excists on the blockchain
+                else if (this.getProductIds().Contains(product["id"].ToObject<int>()))
+                {
+                    // TODO: check if the sender if the product with id thats being send, was the reciever of the product in its latest transaction
+
+                    // add the product to the list
+                    products.Add(this.GetProduct(product["id"].ToObject<int>()));
+                }
+                else
+                {
+                    response.Add("validation", false);
+                    response.Add("response", "A product in your transaction is not present on the blockchain");
+                    return JObject.Parse(Newtonsoft.Json.JsonConvert.SerializeObject(response));
+                }
+
+            }
+
+            // make a new transaction add it to the blockchain transaction list
+            int index = this.newTransaction(new Transaction(products, request["sender"].ToString(), request["recipient"].ToString(), request["chainTokens"].ToObject<double>(), request["transactionFee"].ToObject<double>()));
+
+            // return the validated request
+            response.Add("validation", true);
+            response.Add("response", "Your transaction will be added to block " + index);
+            return JObject.Parse(Newtonsoft.Json.JsonConvert.SerializeObject(response));
+
+        }
+
+        /* HASHING AND MINING */
+
+        public string hash(Object blockchainObject)
         {
             SHA256 sha256 = SHA256Managed.Create();
 
-            byte[] bytes = Encoding.UTF8.GetBytes(Newtonsoft.Json.JsonConvert.SerializeObject(block));
+            byte[] bytes = Encoding.UTF8.GetBytes(Newtonsoft.Json.JsonConvert.SerializeObject(blockchainObject));
 
             byte[] hash = sha256.ComputeHash(bytes);
 

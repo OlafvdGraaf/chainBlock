@@ -11,8 +11,8 @@ namespace blockchain_dotnet_app
     class Program
     {
         // Create name for node
-        // replace with public key generation
-        public static string node_identifier = "MyNode";
+        // replace with creating a new node, with a public key creation in its contructor
+        public static string node_identifier = "127.0.0.1:5000";
 
         //Instantiate The Chain
         public static Blockchain blockchain = new Blockchain();

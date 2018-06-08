@@ -37,74 +37,59 @@ namespace blockchain_dotnet_app
 
             return Json(response);
         }
-        [HttpPost("transaction/test")]
-        public IActionResult test([FromBody]JObject value)
+
+        [HttpPost("transaction/distribute")]
+        public IActionResult distribute([FromBody]JObject value)
         {
+            // initialize response
+            Dictionary<string, dynamic> response = new Dictionary<string, dynamic>();
+
+            // validate the transaction
+            var validation = Program.blockchain.validateTransaction(value["transaction"].ToObject<JObject>());
+
+            if (!validation["validation"].ToObject<bool>())
+            {
+                response.Add("validation", "failed");
+                response.Add("response", validation["response"]);
+                return Ok(response);
+            }
+
+            // get the list of nodes to exclude in the distribution
+            List<string> skipnodes = value["nodes"].ToObject<List<string>>();
+
+            // spread the transaction to neighboring nodes
+            Program.blockchain.distributeTransaction(value["transaction"].ToObject<JObject>(), skipnodes);
+
+            // fill in the response with the transaction
+            response.Add("validation", "success");
+            response.Add("transaction", value["transaction"]);
+            response.Add("distributed", value["nodes"]);
+
             return Ok(value);
         }
 
         [HttpPost("transaction/new")]
         public IActionResult newTransaction([FromBody]JObject value)
         {
-            //set the rules of the expected json thorugh http request
-            string[] required = new string[] { "products", "sender", "recipient", "chainTokens", "transactionFee" };
-
-            //check if the post request has the right json keys
-            foreach (string rule in required)
+            // validate and add transaction from request
+            var validation = Program.blockchain.validateTransaction(value);
+            if (!validation["validation"].ToObject<bool>())
             {
-                if (!value.ContainsKey(rule))
-                {
-                    return BadRequest("Missing values");
-                }
+                return BadRequest(validation["response"]);
             }
 
-            // init a list for new products
-            List<Product> products = new List<Product>();
-
-            //check if the product is new or an excisting
-            foreach (var product in value["products"])
-            {
-                // check if a new product is made
-                if (product["id"].ToString() == "new")
-                {
-                    // TODO: check if the the node that made a new product is a diamond miner
-
-                    // create new product
-                    products.Add(new Product(product["weight"].ToObject<int>()));
-                }
-                // check if the product excists on the blockchain
-                else if (Program.blockchain.getProductIds().Contains(product["id"].ToObject<int>()))
-                {
-                    // TODO: check if the sender if the product with id thats being send, was the reciever of the product in its latest transaction
-
-                    // add the product to the list
-                    products.Add(Program.blockchain.GetProduct(product["id"].ToObject<int>()));
-                }
-                else
-                {
-                    return BadRequest("A product in your transaction is not present on the blockchain");
-                }
-
-            }
-
-            // make new transaction object
-            Transaction new_transaction = new Transaction(products, value["sender"].ToString(), value["recipient"].ToString(), value["chainTokens"].ToObject<double>(), value["transactionFee"].ToObject<double>());
-
-            // add the new transaction to the blockchain transaction list and return the block index of the next block
-            var index = Program.blockchain.newTransaction(new_transaction);
-            
-            // make the response message
-            string response = "Your transaction will be added to block " + index;
+            // distribute the transaction over the network
+            Program.blockchain.distributeTransaction(value, new List<string>() { Program.node_identifier });
 
             // return a 200 http request with the reponse
-            return Ok(response);
+            return Ok(validation["response"]);
             
         }
 
         [HttpGet("chain")]
         public JsonResult chain()
         {
-            //return the blockchain and the amount of blocks
+            // return the blockchain and the amount of blocks
             var response = new Dictionary<string, dynamic>();
             response.Add("chain", Program.blockchain.getChain());
             response.Add("length", Program.blockchain.getChain().Count);
