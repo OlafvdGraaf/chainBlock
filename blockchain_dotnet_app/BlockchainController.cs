@@ -107,7 +107,7 @@ namespace blockchain_dotnet_app
         }
 
         [HttpGet("trace/{id}")]
-        public IActionResult trace(int id)
+        public IActionResult trace(string id)
         {
             foreach(var product in Program.blockchain.getProducts())
             {

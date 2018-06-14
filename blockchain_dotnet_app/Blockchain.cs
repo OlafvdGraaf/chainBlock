@@ -54,7 +54,7 @@ namespace blockchain_dotnet_app
             return this.products;
         }
 
-        public Product GetProduct(int id)
+        public Product GetProduct(string id)
         {
             foreach(Product product in this.products)
             {
@@ -66,10 +66,10 @@ namespace blockchain_dotnet_app
             return null;
         }
 
-        public List<int> getProductIds()
+        public List<string> getProductIds()
         {
             // init a list of id's
-            List<int> product_ids = new List<int>();
+            List<string> product_ids = new List<string>();
 
             foreach(var product in this.products)
             {
@@ -79,7 +79,7 @@ namespace blockchain_dotnet_app
             return product_ids;
         }
 
-        public List<Transaction> getProductTransactions(int id)
+        public List<Transaction> getProductTransactions(string id)
         {
             // init a new list of transactions
             List<Transaction> product_transactions = new List<Transaction>();
@@ -227,12 +227,12 @@ namespace blockchain_dotnet_app
                     products.Add(new Product(product["weight"].ToObject<int>()));
                 }
                 // check if the product excists on the blockchain
-                else if (this.getProductIds().Contains(product["id"].ToObject<int>()))
+                else if (this.getProductIds().Contains(product["id"].ToObject<string>()))
                 {
                     // TODO: check if the sender if the product with id thats being send, was the reciever of the product in its latest transaction
 
                     // add the product to the list
-                    products.Add(this.GetProduct(product["id"].ToObject<int>()));
+                    products.Add(this.GetProduct(product["id"].ToObject<string>()));
                 }
                 else
                 {

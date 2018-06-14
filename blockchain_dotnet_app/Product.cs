@@ -8,15 +8,21 @@ namespace blockchain_dotnet_app
     public class Product
     {
         static int counter;
-        public int id;
+        public string id;
         //private node origin
         public int weight;
 
         public Product(int weight)
         {
             Interlocked.Increment(ref counter);
-            this.id = counter;
             this.weight = weight;
+
+            this.setHash();
+        }
+
+        private void setHash()
+        {
+            this.id = Program.blockchain.hash(this);
         }
     }
 }
