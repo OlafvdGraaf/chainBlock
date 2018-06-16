@@ -15,7 +15,7 @@ namespace blockchain_dotnet_app
     class Blockchain
     {
         private List<Block> chain;
-        private List<string> nodes;
+        private List<NeighborNode> nodes;
         private List<Product> products;
         public List<Transaction> current_transactions;
         
@@ -25,7 +25,7 @@ namespace blockchain_dotnet_app
         {
             this.chain = new List<Block>();
             this.current_transactions = new List<Transaction>();
-            this.nodes = new List<string>();
+            this.nodes = new List<NeighborNode>();
             this.products = new List<Product>();
 
             // create genisis block
@@ -39,7 +39,7 @@ namespace blockchain_dotnet_app
             return this.chain;
         }
 
-        public List<string> getNodes()
+        public List<NeighborNode> getNodes()
         {
             return this.nodes;
         }
@@ -79,6 +79,20 @@ namespace blockchain_dotnet_app
             return product_ids;
         }
 
+        public List<string> getNodeIps()
+        {
+            // init a list of ip's
+            List<string> node_ips = new List<string>();
+
+            foreach (var node in this.nodes)
+            {
+                node_ips.Add(node.ip);
+            }
+
+            return node_ips;
+        }
+
+
         public List<Transaction> getProductTransactions(string id)
         {
             // init a new list of transactions
@@ -104,11 +118,11 @@ namespace blockchain_dotnet_app
 
         /* CREATION OF ENTITIES */
 
-        public void registerNode(string address)
+        public void registerNode(NeighborNode node)
         {
-            if (!this.nodes.Contains(address))
+            if (!this.nodes.Any(p => string.Equals(p.ip, node.ip, StringComparison.CurrentCulture)))
             {
-                this.nodes.Add(address);
+                this.nodes.Add(node);
             }
             
         }
@@ -143,7 +157,7 @@ namespace blockchain_dotnet_app
 
         public async Task distributeTransaction(JObject transaction, List<string> skipnodes)
         {
-            List<string> neighbors = this.nodes.Except(skipnodes).ToList();
+            List<string> neighbors = this.getNodeIps().Except(skipnodes).ToList();
 
             // add the neighbors to the nodes to skip
             skipnodes.AddRange(neighbors);
@@ -195,6 +209,8 @@ namespace blockchain_dotnet_app
 
         public JObject validateTransaction(JObject request)
         {
+            /* JSON VALIDATION */
+
             // set the rules of the expected request
             string[] required = new string[] { "products", "sender", "recipient", "chainTokens", "transactionFee" };
 
@@ -212,45 +228,109 @@ namespace blockchain_dotnet_app
                 }
             }
 
+            // get the nodetype of the sender of the transaction (if available)
+            string type = "undefined";
+
+            if(request["sender"].ToString() == Program.node_identifier.id)
+            {
+                type = Program.node_identifier.type;
+            }
+            else if(this.nodes.Any(p => string.Equals(p.id, request["sender"].ToString(), StringComparison.CurrentCulture)))
+            {
+                type = this.nodes.Where(p => string.Equals(p.id, request["sender"].ToString(), StringComparison.CurrentCulture)).First().type;
+            }
+
+            /* PRODUCT VALIDATION */
+
             // init a list for new products
             List<Product> products = new List<Product>();
 
-            //check if the product is new or an excisting
+            // if the transaction has products, check if the product is new or an excisting one
             foreach (var product in request["products"])
             {
-                // check if a new product is made
-                if (product["id"].ToString() == "new")
+                // check if the sender has the rights to send products
+                if (type == "supplychain" | type == "supplychain_miner")
                 {
-                    // TODO: check if the the node that made a new product is a diamond miner
+                    // check if a new product is made
+                    if (product["id"].ToString() == "new")
+                    {
+                        // check if the the node that made a new product is a diamond miner
+                        if (type == "supplychain_miner")
+                        {
+                            products.Add(new Product(product["weight"].ToObject<int>()));
+                        }
+                        else
+                        {
+                            // sender does not have the right node type
+                            response.Add("validation", false);
+                            response.Add("response", "Product creator is not a verified diamondminer of the supplychain");
+                            return JObject.Parse(Newtonsoft.Json.JsonConvert.SerializeObject(response));
+                        }
 
-                    // create new product
-                    products.Add(new Product(product["weight"].ToObject<int>()));
+                    }
+                    // check if the product excists on the blockchain
+                    else if (this.getProductIds().Contains(product["id"].ToString()))
+                    {
+                        // check if the sender of the product with id thats being send, was the reciever of the product in its latest transaction
+                        var latest_transaction = this.getProductTransactions(product["id"].ToString()).Last();
+                        if (latest_transaction.recipient == request["sender"].ToString())
+                        {
+                            // add the product to the list
+                            products.Add(this.GetProduct(product["id"].ToObject<string>()));
+                        }
+                        else
+                        {
+                            // sender has no ownership over the send product
+                            response.Add("validation", false);
+                            response.Add("response", "A product in the transaction does not belong to sender");
+                            return JObject.Parse(Newtonsoft.Json.JsonConvert.SerializeObject(response));
+                        }
+                    }
+                    else
+                    {
+                        response.Add("validation", false);
+                        response.Add("response", "A product in the transaction is not present on the blockchain");
+                        return JObject.Parse(Newtonsoft.Json.JsonConvert.SerializeObject(response));
+                    }
                 }
-                // check if the product excists on the blockchain
-                else if (this.getProductIds().Contains(product["id"].ToObject<string>()))
+                else if(type == "normal")
                 {
-                    // TODO: check if the sender if the product with id thats being send, was the reciever of the product in its latest transaction
-
-                    // add the product to the list
-                    products.Add(this.GetProduct(product["id"].ToObject<string>()));
+                    response.Add("validation", false);
+                    response.Add("response", "The sender does is not a member of the supplychain, and thus cannot send products");
+                    return JObject.Parse(Newtonsoft.Json.JsonConvert.SerializeObject(response));
                 }
                 else
                 {
                     response.Add("validation", false);
-                    response.Add("response", "A product in your transaction is not present on the blockchain");
+                    response.Add("response", "No information about sender available, cannot validate");
                     return JObject.Parse(Newtonsoft.Json.JsonConvert.SerializeObject(response));
                 }
-
             }
 
-            // make a new transaction add it to the blockchain transaction list
-            int index = this.newTransaction(new Transaction(products, request["sender"].ToString(), request["recipient"].ToString(), request["chainTokens"].ToObject<double>(), request["transactionFee"].ToObject<double>()));
+            /* BALANCE VALIDATION */
+            // make here
 
-            // return the validated request
-            response.Add("validation", true);
-            response.Add("response", "Your transaction will be added to block " + index);
-            return JObject.Parse(Newtonsoft.Json.JsonConvert.SerializeObject(response));
+            // make a new transaction
+            var new_transaction = new Transaction(products, request["sender"].ToString(), request["recipient"].ToString(), request["chainTokens"].ToObject<double>(), request["transactionFee"].ToObject<double>());
 
+            // check if the transaction is already present in the list of current transactions  
+            if (!this.current_transactions.Contains(new_transaction))
+            {
+                // add it to the list of current transactions
+                int index = this.newTransaction(new_transaction);
+
+                // return the validated request
+                response.Add("validation", true);
+                response.Add("response", "Your transaction will be added to block " + index);
+                return JObject.Parse(Newtonsoft.Json.JsonConvert.SerializeObject(response));
+            }
+            else
+            {
+                // return the validated request with
+                response.Add("validation", true);
+                response.Add("response", "The transaction passed the validation, but was already included in the transaction list");
+                return JObject.Parse(Newtonsoft.Json.JsonConvert.SerializeObject(response));
+            }
         }
 
         /* HASHING AND MINING */
@@ -336,7 +416,7 @@ namespace blockchain_dotnet_app
 
         public bool resolveConflicts()
         {
-            List<string> neighbors = this.nodes;
+            List<string> neighbors = this.getNodeIps();
             List<Block> new_chain = null;
 
             var max_length = this.chain.Count;

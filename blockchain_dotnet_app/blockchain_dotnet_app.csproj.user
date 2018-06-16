@@ -4,6 +4,6 @@
     <DebuggerFlavor>ProjectDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup>
-    <ActiveDebugProfile>BlockChain</ActiveDebugProfile>
+    <ActiveDebugProfile>blockchain_dotnet_app</ActiveDebugProfile>
   </PropertyGroup>
 </Project>

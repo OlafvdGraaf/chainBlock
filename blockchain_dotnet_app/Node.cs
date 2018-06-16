@@ -4,7 +4,12 @@ using System.Text;
 
 namespace blockchain_dotnet_app
 {
-    class Node
+    abstract class Node
     {
+        public string ip;
+        public string id;
+        public string type; 
+
     }
+
 }

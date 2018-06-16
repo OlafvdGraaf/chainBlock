@@ -10,12 +10,11 @@ namespace blockchain_dotnet_app
 {
     class Program
     {
-        // Create name for node
-        // replace with creating a new node, with a public key creation in its contructor
-        public static string node_identifier = "127.0.0.1:5000";
-
         //Instantiate The Chain
         public static Blockchain blockchain = new Blockchain();
+
+        // Create node
+        public static Node node_identifier = new SelfNode("127.0.0.1:5000",true,true);
 
         static void Main(string[] args)
         {
@@ -28,7 +27,6 @@ namespace blockchain_dotnet_app
                 .Build();
 
             host.Run();
-
         }
         
     }

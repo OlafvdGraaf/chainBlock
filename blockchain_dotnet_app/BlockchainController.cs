@@ -18,7 +18,7 @@ namespace blockchain_dotnet_app
             var proof = Program.blockchain.proofOfWork(last_proof);
 
             //transaction for the block reward
-            Transaction block_reward = new Transaction(new List<Product>(), "chainBlock foundation", Program.node_identifier, 10, 0);
+            Transaction block_reward = new Transaction(new List<Product>(), "The ChainBlock foundation", Program.node_identifier.id, 10, 0);
             Program.blockchain.newTransaction(block_reward);
 
             //forge a new block and add it to the chain
@@ -47,25 +47,30 @@ namespace blockchain_dotnet_app
             // validate the transaction
             var validation = Program.blockchain.validateTransaction(value["transaction"].ToObject<JObject>());
 
+            // get the list of nodes to exclude in the distribution
+            List<string> skipnodes = value["nodes"].ToObject<List<string>>();
+
             if (!validation["validation"].ToObject<bool>())
             {
                 response.Add("validation", "failed");
                 response.Add("response", validation["response"]);
+                if(validation["response"].ToString() == "No information about sender available, cannot validate")
+                {
+                    Program.blockchain.distributeTransaction(value["transaction"].ToObject<JObject>(), skipnodes);
+                }
                 return Ok(response);
             }
-
-            // get the list of nodes to exclude in the distribution
-            List<string> skipnodes = value["nodes"].ToObject<List<string>>();
 
             // spread the transaction to neighboring nodes
             Program.blockchain.distributeTransaction(value["transaction"].ToObject<JObject>(), skipnodes);
 
             // fill in the response with the transaction
             response.Add("validation", "success");
+            response.Add("message", validation["response"]);
             response.Add("transaction", value["transaction"]);
             response.Add("distributed", value["nodes"]);
 
-            return Ok(value);
+            return Ok(response);
         }
 
         [HttpPost("transaction/new")]
@@ -79,7 +84,7 @@ namespace blockchain_dotnet_app
             }
 
             // distribute the transaction over the network
-            Program.blockchain.distributeTransaction(value, new List<string>() { Program.node_identifier });
+            Program.blockchain.distributeTransaction(value, new List<string>() { Program.node_identifier.ip });
 
             // return a 200 http request with the reponse
             return Ok(validation["response"]);
@@ -119,6 +124,15 @@ namespace blockchain_dotnet_app
             return NotFound("The product Id was not found on the blockchain");
         }
 
+        [HttpGet("address")]
+        public JsonResult address()
+        {
+            //return the hash of the node
+            var response = new Dictionary<string, dynamic>();
+            response.Add("node_hash", Program.node_identifier.id);
+            return Json(response);
+        }
+
         [HttpPost("nodes/register")]
         public IActionResult registerNodes([FromBody]JObject value)
         {
@@ -131,7 +145,7 @@ namespace blockchain_dotnet_app
 
             foreach(var node in nodes)
             {
-                Program.blockchain.registerNode(node.ToString());
+                Program.blockchain.registerNode(node.ToObject<NeighborNode>());
             }
 
             Dictionary<string, dynamic> response = new Dictionary<string, dynamic>()
