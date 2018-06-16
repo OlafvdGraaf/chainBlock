@@ -4,7 +4,7 @@ using System.Text;
 
 namespace blockchain_dotnet_app
 {
-    class NeighborNode : Node
+    public class NeighborNode : Node
     {
         public NeighborNode(string ip, string id, string type)
         {

@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace blockchain_dotnet_app
 {
-    class SelfNode : Node
+    public class SelfNode : Node
     {
         private RSAParameters publicKey;
         private RSAParameters privateKey;

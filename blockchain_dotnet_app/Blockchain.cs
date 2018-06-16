@@ -12,7 +12,7 @@ using Newtonsoft.Json.Linq;
 
 namespace blockchain_dotnet_app
 {
-    class Blockchain
+    public class Blockchain
     {
         private List<Block> chain;
         private List<NeighborNode> nodes;
