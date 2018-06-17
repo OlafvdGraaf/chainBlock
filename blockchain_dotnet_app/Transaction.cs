@@ -16,14 +16,14 @@ namespace blockchain_dotnet_app
         public double transactionFee;
         public DateTime time;
 
-        public Transaction(List<Product> products, string sender, string recipient, double chainTokens, double transactionFee)
+        public Transaction(List<Product> products, string sender, string recipient, double chainTokens, double transactionFee, DateTime time)
         {
             this.products = products;
             this.sender = sender;
             this.recipient = recipient;
             this.chainTokens = chainTokens;
             this.transactionFee = transactionFee;
-            this.time = DateTime.Now;
+            this.time = time;
 
             this.setHash();
         }

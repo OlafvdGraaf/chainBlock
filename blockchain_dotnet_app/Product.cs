@@ -9,7 +9,6 @@ namespace blockchain_dotnet_app
     {
         static int counter;
         public string id;
-        //private node origin
         public int weight;
 
         public Product(int weight)

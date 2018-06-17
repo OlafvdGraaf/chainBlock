@@ -44,41 +44,6 @@ namespace blockchain_dotnet_app
             return this.nodes;
         }
 
-        public Block getLastBlock()
-        {
-            return this.chain.Last();
-        }
-
-        public List<Product> getProducts()
-        {
-            return this.products;
-        }
-
-        public Product GetProduct(string id)
-        {
-            foreach(Product product in this.products)
-            {
-                if(product.id == id)
-                {
-                    return product;
-                }
-            }
-            return null;
-        }
-
-        public List<string> getProductIds()
-        {
-            // init a list of id's
-            List<string> product_ids = new List<string>();
-
-            foreach(var product in this.products)
-            {
-                product_ids.Add(product.id);
-            }
-
-            return product_ids;
-        }
-
         public List<string> getNodeIps()
         {
             // init a list of ip's
@@ -92,12 +57,27 @@ namespace blockchain_dotnet_app
             return node_ips;
         }
 
+        public Block getLastBlock()
+        {
+            return this.chain.Last();
+        }
+
+        public List<Product> getProducts()
+        {
+            return this.products;
+        }
+
+        public Product GetProduct(string id)
+        {
+            return this.products.Where(p => string.Equals(p.id, id, StringComparison.CurrentCulture)).First();
+        }
 
         public List<Transaction> getProductTransactions(string id)
         {
             // init a new list of transactions
             List<Transaction> product_transactions = new List<Transaction>();
 
+            // check all confirmed transaction on the blockchain
             foreach(var block in this.chain)
             {
                 foreach(var transaction in block.transactions)
@@ -108,6 +88,18 @@ namespace blockchain_dotnet_app
                         {
                             product_transactions.Add(transaction);
                         }
+                    }
+                }
+            }
+
+            // check the current transactions
+            foreach(var transaction in this.current_transactions)
+            {
+                foreach (var product in transaction.products)
+                {
+                    if (product.id == id)
+                    {
+                        product_transactions.Add(transaction);
                     }
                 }
             }
@@ -212,7 +204,7 @@ namespace blockchain_dotnet_app
             /* JSON VALIDATION */
 
             // set the rules of the expected request
-            string[] required = new string[] { "products", "sender", "recipient", "chainTokens", "transactionFee" };
+            string[] required = new string[] { "products", "sender", "recipient", "chainTokens", "transactionFee", "time" };
 
             // initialize response
             Dictionary<string, dynamic> response = new Dictionary<string, dynamic>();
@@ -269,7 +261,7 @@ namespace blockchain_dotnet_app
 
                     }
                     // check if the product excists on the blockchain
-                    else if (this.getProductIds().Contains(product["id"].ToString()))
+                    else if (this.getProducts().Any(p => string.Equals(p.id, product["id"].ToString(),StringComparison.CurrentCulture)))
                     {
                         // check if the sender of the product with id thats being send, was the reciever of the product in its latest transaction
                         var latest_transaction = this.getProductTransactions(product["id"].ToString()).Last();
@@ -280,7 +272,7 @@ namespace blockchain_dotnet_app
                         }
                         else
                         {
-                            // sender has no ownership over the send product
+                            // sender has no ownership over the sent product
                             response.Add("validation", false);
                             response.Add("response", "A product in the transaction does not belong to sender");
                             return JObject.Parse(Newtonsoft.Json.JsonConvert.SerializeObject(response));
@@ -311,24 +303,24 @@ namespace blockchain_dotnet_app
             // make here
 
             // make a new transaction
-            var new_transaction = new Transaction(products, request["sender"].ToString(), request["recipient"].ToString(), request["chainTokens"].ToObject<double>(), request["transactionFee"].ToObject<double>());
+            var new_transaction = new Transaction(products, request["sender"].ToString(), request["recipient"].ToString(), request["chainTokens"].ToObject<double>(), request["transactionFee"].ToObject<double>(), request["time"].ToObject<DateTime>());
 
             // check if the transaction is already present in the list of current transactions  
-            if (!this.current_transactions.Contains(new_transaction))
+            if (!this.current_transactions.Any(p => string.Equals(p.id, new_transaction.id, StringComparison.CurrentCulture)))
             {
                 // add it to the list of current transactions
                 int index = this.newTransaction(new_transaction);
 
                 // return the validated request
                 response.Add("validation", true);
-                response.Add("response", "Your transaction will be added to block " + index);
+                response.Add("response", "The transaction will be added to block " + index);
                 return JObject.Parse(Newtonsoft.Json.JsonConvert.SerializeObject(response));
             }
             else
             {
                 // return the validated request with
                 response.Add("validation", true);
-                response.Add("response", "The transaction passed the validation, but was already included in the transaction list");
+                response.Add("response", "The transaction passed validation, but is already in present in the list of current transactions");
                 return JObject.Parse(Newtonsoft.Json.JsonConvert.SerializeObject(response));
             }
         }

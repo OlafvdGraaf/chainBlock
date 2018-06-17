@@ -18,7 +18,7 @@ namespace blockchain_dotnet_app
             var proof = Program.blockchain.proofOfWork(last_proof);
 
             //transaction for the block reward
-            Transaction block_reward = new Transaction(new List<Product>(), "The ChainBlock foundation", Program.node_identifier.id, 10, 0);
+            Transaction block_reward = new Transaction(new List<Product>(), "The ChainBlock foundation", Program.node_identifier.id, 10, 0, DateTime.Now);
             Program.blockchain.newTransaction(block_reward);
 
             //forge a new block and add it to the chain
@@ -76,6 +76,9 @@ namespace blockchain_dotnet_app
         [HttpPost("transaction/new")]
         public IActionResult newTransaction([FromBody]JObject value)
         {
+            // add time of the transaction to the JObject
+            value["time"] = DateTime.Now;
+
             // validate and add transaction from request
             var validation = Program.blockchain.validateTransaction(value);
             if (!validation["validation"].ToObject<bool>())
