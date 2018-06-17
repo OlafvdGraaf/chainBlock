@@ -10087,23 +10087,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Wouter\\.nuget\\packages\\": {},
+    "C:\\Users\\Dymos\\.nuget\\packages\\": {},
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Wouter\\Documents\\GitHub\\chainBlock\\blockchain_dotnet_app.Tests\\blockchain_dotnet_app.Tests.csproj",
+      "projectUniqueName": "C:\\Users\\Dymos\\Documents\\hogeschoolrotterdamjaar2\\chainBlock\\chainBlock\\blockchain_dotnet_app.Tests\\blockchain_dotnet_app.Tests.csproj",
       "projectName": "blockchain_dotnet_app.Tests",
-      "projectPath": "C:\\Users\\Wouter\\Documents\\GitHub\\chainBlock\\blockchain_dotnet_app.Tests\\blockchain_dotnet_app.Tests.csproj",
-      "packagesPath": "C:\\Users\\Wouter\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Wouter\\Documents\\GitHub\\chainBlock\\blockchain_dotnet_app.Tests\\obj\\",
+      "projectPath": "C:\\Users\\Dymos\\Documents\\hogeschoolrotterdamjaar2\\chainBlock\\chainBlock\\blockchain_dotnet_app.Tests\\blockchain_dotnet_app.Tests.csproj",
+      "packagesPath": "C:\\Users\\Dymos\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Dymos\\Documents\\hogeschoolrotterdamjaar2\\chainBlock\\chainBlock\\blockchain_dotnet_app.Tests\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "C:\\Users\\Wouter\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Dymos\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -10116,8 +10116,8 @@
       "frameworks": {
         "netcoreapp2.0": {
           "projectReferences": {
-            "C:\\Users\\Wouter\\Documents\\GitHub\\chainBlock\\blockchain_dotnet_app\\blockchain_dotnet_app.csproj": {
-              "projectPath": "C:\\Users\\Wouter\\Documents\\GitHub\\chainBlock\\blockchain_dotnet_app\\blockchain_dotnet_app.csproj"
+            "C:\\Users\\Dymos\\Documents\\hogeschoolrotterdamjaar2\\chainBlock\\chainBlock\\blockchain_dotnet_app\\blockchain_dotnet_app.csproj": {
+              "projectPath": "C:\\Users\\Dymos\\Documents\\hogeschoolrotterdamjaar2\\chainBlock\\chainBlock\\blockchain_dotnet_app\\blockchain_dotnet_app.csproj"
             }
           }
         }

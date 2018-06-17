@@ -1,0 +1,11 @@
+C:\Users\Dymos\Documents\hogeschoolrotterdamjaar2\chainBlock\chainBlock\blockchain_dotnet_client\bin\Debug\netcoreapp2.0\blockchain_dotnet_client.deps.json
+C:\Users\Dymos\Documents\hogeschoolrotterdamjaar2\chainBlock\chainBlock\blockchain_dotnet_client\bin\Debug\netcoreapp2.0\blockchain_dotnet_client.runtimeconfig.json
+C:\Users\Dymos\Documents\hogeschoolrotterdamjaar2\chainBlock\chainBlock\blockchain_dotnet_client\bin\Debug\netcoreapp2.0\blockchain_dotnet_client.runtimeconfig.dev.json
+C:\Users\Dymos\Documents\hogeschoolrotterdamjaar2\chainBlock\chainBlock\blockchain_dotnet_client\bin\Debug\netcoreapp2.0\blockchain_dotnet_client.dll
+C:\Users\Dymos\Documents\hogeschoolrotterdamjaar2\chainBlock\chainBlock\blockchain_dotnet_client\bin\Debug\netcoreapp2.0\blockchain_dotnet_client.pdb
+C:\Users\Dymos\Documents\hogeschoolrotterdamjaar2\chainBlock\chainBlock\blockchain_dotnet_client\obj\Debug\netcoreapp2.0\blockchain_dotnet_client.csprojAssemblyReference.cache
+C:\Users\Dymos\Documents\hogeschoolrotterdamjaar2\chainBlock\chainBlock\blockchain_dotnet_client\obj\Debug\netcoreapp2.0\blockchain_dotnet_client.csproj.CoreCompileInputs.cache
+C:\Users\Dymos\Documents\hogeschoolrotterdamjaar2\chainBlock\chainBlock\blockchain_dotnet_client\obj\Debug\netcoreapp2.0\blockchain_dotnet_client.AssemblyInfoInputs.cache
+C:\Users\Dymos\Documents\hogeschoolrotterdamjaar2\chainBlock\chainBlock\blockchain_dotnet_client\obj\Debug\netcoreapp2.0\blockchain_dotnet_client.AssemblyInfo.cs
+C:\Users\Dymos\Documents\hogeschoolrotterdamjaar2\chainBlock\chainBlock\blockchain_dotnet_client\obj\Debug\netcoreapp2.0\blockchain_dotnet_client.dll
+C:\Users\Dymos\Documents\hogeschoolrotterdamjaar2\chainBlock\chainBlock\blockchain_dotnet_client\obj\Debug\netcoreapp2.0\blockchain_dotnet_client.pdb
